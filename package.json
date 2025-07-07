@@ -1,0 +1,21 @@
+{
+  "name": "drip-irrigation-dashboard",
+  "version": "1.0.0",
+  "description": "Drip Irrigation Monitoring System - KKN-PPM UGM 2025",
+  "main": "index.html",
+  "scripts": {
+    "dev": "serve . -l 8000",
+    "start": "serve . -l 8000"
+  },
+  "keywords": [
+    "irrigation",
+    "monitoring",
+    "dashboard",
+    "kkn-ppm",
+    "ugm"
+  ],
+  "author": "Citta Bulukumba - KKN-PPM UGM 2025",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Drip Irrigation System - KKN-PPM UGM 2025</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo-icon">🌱</div>
+                <div class="header-title">
+                    <h1 class="main-title">Smart Drip Irrigation System</h1>
+                    <p class="subtitle">Kelurahan Tanah Jaya - Water Level & Soil Moisture Monitoring</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-center">
+                    <button class="settings-button" onclick="openSettings()">
+                        ⚙️ Settings
+                    </button>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>System Online</span>
+                    </div>
+                </div>
+                <div class="header-info">
+                    <div class="date-time">
+                        <div class="organization">KKN PPM UGM</div>
+                        <div class="current-time" id="current-time">Senin, 7 Juli 2025</div>
+                    </div>
+                </div>
+                <div class="header-logo">
+                   <img src="LOGO NEGATIVE.png" alt="Logo CITTA UGM" class="logo-kkn">
+            </div>
+        </header>
+
+        <!-- Time Period Controls -->
+        <div class="time-controls">
+            <button class="time-button active" onclick="loadData('daily');setActive(this)">
+                📅 Daily
+            </button>
+            <button class="time-button" onclick="loadData('weekly');setActive(this)">
+                📊 Weekly
+            </button>
+            <button class="time-button" onclick="loadData('monthly');setActive(this)">
+                📈 Monthly
+            </button>
+        </div>
+
+        <!-- Location Card -->
+        <div class="location-card">
+            <div class="location-info">
+                <div class="location-icon">📍</div>
+                <div class="location-details">
+                    <h3>Monitoring Location</h3>
+                    <p>Kelurahan Tanah Jaya, Kabupaten Bulukumba</p>
+                    <span class="zone-badge">Smart Agriculture Zone</span>
+                </div>
+            </div>
+            <div class="environmental-data">
+                <div class="env-item">
+                    <span class="env-icon">🌡️</span>
+                    <span>28°C</span>
+                </div>
+                <div class="env-item">
+                    <span class="env-icon">💧</span>
+                    <span>65% RH</span>
+                </div>
+                <div class="env-item">
+                    <span class="env-icon">💨</span>
+                    <span>12 km/h</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-info">
+                        <div class="metric-icon water">💧</div>
+                        <div class="metric-details">
+                            <h4>Water Volume</h4>
+                            <p>Tank water volume monitoring</p>
+                        </div>
+                    </div>
+                    <span class="status-badge low">LOW</span>
+                </div>
+                <div class="metric-value" id="water-level-value">80.0L (80%)</div>
+                <div class="metric-description">
+                    <div class="status-dot-small"></div>
+                    <span>Tank water volume monitoring</span>
+                </div>
+                <div class="countdown-display">
+                    <div class="countdown-label">Perkiraan Habis</div>
+                    <div class="countdown-value" id="tank-countdown">Menghitung...</div>
+                </div>
+                <div class="water-level-controls">
+                    <button class="control-btn success" onclick="waterVolumeManager?.performIrrigation()">
+                        🌱 Siram Manual
+                    </button>
+                    <button class="control-btn danger" onclick="waterVolumeManager?.emptyTank()">
+                        🗑️ Kosongkan
+                    </button>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-info">
+                        <div class="metric-icon soil">🌱</div>
+                        <div class="metric-details">
+                            <h4>Soil Moisture</h4>
+                            <p>Soil moisture content</p>
+                        </div>
+                    </div>
+                    <span class="status-badge wet">WET</span>
+                </div>
+                <div class="metric-value" id="soil-moisture-value">45.0%</div>
+                <div class="metric-description">
+                    <div class="status-dot-small"></div>
+                    <span>Soil moisture content</span>
+                </div>
+                <div class="water-level-controls" style="margin-top: 16px;">
+                    <button class="control-btn danger" onclick="soilMoistureManager?.emptyMoisture()">
+                        🗑️ Kosongkan Moisture
+                    </button>
+                </div>
+                <!-- Weather control will be inserted here by JavaScript -->
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-info">
+                        <div class="metric-icon irrigation">⚡</div>
+                        <div class="metric-details">
+                            <h4>Irrigation Status</h4>
+                            <p>Auto-irrigation enabled</p>
+                        </div>
+                    </div>
+                    <span class="status-badge running">RUNNING</span>
+                </div>
+                <div class="metric-value">Active</div>
+                <div class="metric-description">
+                    <div class="status-dot-small"></div>
+                    <span>Auto-irrigation enabled</span>
+                </div>
+                <div class="weather-fallback-status" id="weather-fallback-status">
+                    <div class="fallback-header">
+                        <span class="fallback-icon">🤖</span>
+                        <span class="fallback-title">Intelligent Fallback</span>
+                    </div>
+                    <div class="fallback-info">
+                        <span class="fallback-source" id="fallback-source">Data simulasi aktif</span>
+                        <span class="fallback-update" id="fallback-update">Update 0m lalu</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <div class="chart-icon water">💧</div>
+                        <div>
+                            <h3>Water Volume Monitoring</h3>
+                            <p>Real-time tank water volume measurements</p>
+                        </div>
+                    </div>
+                    <div class="chart-actions">
+                        <button class="chart-action">⬇️</button>
+                        <button class="chart-action">⛶</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart1"></canvas>
+                    <div class="chart-message" id="chart1-message"></div>
+                </div>
+                <div class="chart-footer">
+                    <div class="chart-average">
+                        📊 Average: <span class="average-value" id="average1-value">-- L</span>
+                    </div>
+                    <div class="sensor-status">
+                        <div class="status-dot-small"></div>
+                        <span>Sensor Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <div class="chart-icon soil">🌱</div>
+                        <div>
+                            <h3>Soil Moisture Monitoring</h3>
+                            <p>Real-time soil moisture measurements</p>
+                        </div>
+                    </div>
+                    <div class="chart-actions">
+                        <button class="chart-action">⬇️</button>
+                        <button class="chart-action">⛶</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart2"></canvas>
+                    <div class="chart-message" id="chart2-message"></div>
+                </div>
+                <div class="chart-footer">
+                    <div class="chart-average">
+                        📊 Average: <span class="average-value" id="average2-value">-- %</span>
+                    </div>
+                    <div class="sensor-status">
+                        <div class="status-dot-small"></div>
+                        <span>Sensor Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="control-header">
+                <div class="control-title">
+                    <div class="control-icon">🌊</div>
+                    <h3>Irrigation Control Panel</h3>
+                </div>
+                <span class="mode-badge">Automatic</span>
+            </div>
+            <div class="control-grid">
+                <div class="control-item">
+                    <h4>Water Volume Threshold</h4>
+                    <div class="control-value" id="water-threshold-display">18L</div>
+                    <p class="control-description">Minimum volume for irrigation</p>
+                </div>
+                <div class="control-item">
+                    <h4>Soil Moisture Target</h4>
+                    <div class="control-value">60-80%</div>
+                    <p class="control-description">Optimal moisture range</p>
+                </div>
+                <div class="control-item">
+                    <h4>Irrigation Duration</h4>
+                    <div class="control-value" id="irrigation-duration-display">7L</div>
+                    <p class="control-description">Per irrigation cycle</p>
+                </div>
+                <div class="control-item">
+                    <h4>Next Scheduled</h4>
+                    <div class="control-value" id="next-schedule">06:00</div>
+                    <p class="control-description">Menunggu sinkronisasi...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-left">
+                <div class="footer-icon">🎓</div>
+                <div class="footer-text">
+                    <div>KKN PPM UGM 2025</div>
+                    <div style="font-size: 12px; opacity: 0.8;">Smart Agriculture Initiative</div>
+                </div>
+            </div>
+            <div class="footer-center">
+                © 2025 Citta Bulukumba KKN PPM UGM, Kelurahan Tanah Jaya.
+            </div>
+            <button class="export-button" id="download-report">
+                📊 Export Irrigation Report
+            </button>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>⚙️ System Settings</h2>
+                <button class="close-button" onclick="closeSettings()">✕</button>
+            </div>
+            
+            <div class="settings-body">
+                <div class="settings-section">
+                    <h3>💧 Water Tank Configuration</h3>
+                    <div class="setting-group">
+                        <label for="tankCapacity">Tank Capacity (Liters)</label>
+                        <input type="number" id="tankCapacity" value="100" min="10" max="1000" step="1">
+                        <small>Total capacity of the water tank</small>
+                    </div>
+                    <div class="setting-group">
+                        <label for="irrigationVolume">Irrigation Volume per Session (Liters)</label>
+                        <input type="number" id="irrigationVolume" value="7" min="1" max="50" step="0.5">
+                        <small>Amount of water used per irrigation session</small>
+                    </div>
+                    <div class="setting-group">
+                        <label for="lowLevelThreshold">Low Level Threshold (%)</label>
+                        <input type="number" id="lowLevelThreshold" value="20" min="5" max="50" step="1">
+                        <small>Show warning when water level drops below this percentage</small>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>⏰ Irrigation Schedule</h3>
+                    <div class="setting-group">
+                        <label for="schedule1">Morning Irrigation Time</label>
+                        <input type="time" id="schedule1" value="07:00">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="schedule1Enabled" checked>
+                            <label for="schedule1Enabled">Enable Morning Irrigation</label>
+                        </div>
+                        <small>Automatic irrigation in the morning</small>
+                    </div>
+                    <div class="setting-group">
+                        <label for="schedule2">Evening Irrigation Time</label>
+                        <input type="time" id="schedule2" value="16:00">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="schedule2Enabled" checked>
+                            <label for="schedule2Enabled">Enable Evening Irrigation</label>
+                        </div>
+                        <small>Automatic irrigation in the evening</small>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🌱 Soil Moisture Configuration</h3>
+                    <div class="setting-group">
+                        <label for="soilMoistureMin">Minimum Soil Moisture (%)</label>
+                        <input type="number" id="soilMoistureMin" value="40" min="0" max="100" step="1">
+                        <small>Start irrigation when moisture drops below this level</small>
+                    </div>
+                    <div class="setting-group">
+                        <label for="soilMoistureMax">Maximum Soil Moisture (%)</label>
+                        <input type="number" id="soilMoistureMax" value="80" min="0" max="100" step="1">
+                        <small>Stop irrigation when moisture reaches this level</small>
+                    </div>
+                    <div class="setting-group">
+                        <label for="soilMoistureOptimal">Optimal Soil Moisture (%)</label>
+                        <input type="number" id="soilMoistureOptimal" value="65" min="0" max="100" step="1">
+                        <small>Target moisture level for optimal plant growth</small>
+                    <div class="setting-group">
+                        <label for="irrigationDuration">Irrigation Duration (minutes)</label>
+                        <input type="number" id="irrigationDuration" value="15" min="1" max="60" step="1">
+                        <small>How long each irrigation cycle should run</small>
+                    </div>
+                    <div class="setting-group">
+                        <label for="irrigationInterval">Check Interval (minutes)</label>
+                        <input type="number" id="irrigationInterval" value="30" min="5" max="120" step="5">
+                        <small>How often to check soil moisture levels</small>
+                    </div>
+                    </div>
+                <div class="settings-section">
+                    <h3>🔔 Alert Settings</h3>
+                    <div class="setting-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableAlerts" checked>
+                            <label for="enableAlerts">Enable System Alerts</label>
+                        </div>
+                        <small>Receive notifications for system events</small>
+                    </div>
+                    <div class="setting-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableAutoIrrigation" checked>
+                            <label for="enableAutoIrrigation">Enable Auto Irrigation</label>
+                        </div>
+                        <small>Automatically start irrigation based on soil moisture</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-footer">
+                <button class="settings-button secondary" onclick="resetSettings()">Reset to Default</button>
+                <button class="settings-button primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+                </div>
+    <script src="js/thingspeaks.js"></script>
+    <script src="js/water-level-manager.js"></script>
+    <script src="js/soil-moisture-manager.js"></script>
+    <script src="js/weather-api.js"></script>
+    <script src="js/download.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>
