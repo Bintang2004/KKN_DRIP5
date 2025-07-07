@@ -17,5 +17,7 @@
   "author": "Citta Bulukumba - KKN-PPM UGM 2025",
   "license": "MIT",
   "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "serve": "^14.2.1"
+  }
 }
